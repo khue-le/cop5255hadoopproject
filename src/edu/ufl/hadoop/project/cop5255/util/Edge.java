@@ -42,7 +42,7 @@ public class Edge {
 	}
 	
 	public Double getWeightInDouble() {
-		return weight.getWeight();
+		return weight.getWeightInDouble();
 	}
 	
 }
