@@ -1,6 +1,3 @@
-/**
- * 
- */
 package edu.ufl.hadoop.project.cop5255.util;
 
 /**
