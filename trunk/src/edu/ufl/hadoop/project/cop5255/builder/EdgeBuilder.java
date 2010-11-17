@@ -24,7 +24,7 @@ public class EdgeBuilder {
 		do {
 			node1 = random.nextInt(noOfNodes + 1);
 			node2 = random.nextInt(noOfNodes + 1);
-		} while(node1 != 0 && node2 != 0);
+		} while(node1 == 0 || node2 == 0 || node1 == node2);
  		return new Edge(
  				new GraphNode(node1, NodeColor.WHITE, Double.POSITIVE_INFINITY), 
  				new GraphNode(node2, NodeColor.WHITE, Double.POSITIVE_INFINITY), 
