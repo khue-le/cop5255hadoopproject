@@ -19,20 +19,20 @@ public final class GraphNode {
 	
 	private Weight weight;
 	
-	private Integer Id;
+	private long Id;
 
 	private GraphNode() {
 		edges = new ArrayList<Edge>();
 	}
 	
-	public GraphNode(Integer Id, NodeColor nodeColor, Weight weight) {
+	public GraphNode(long Id, NodeColor nodeColor, Weight weight) {
 		this();
 		this.nodeColor = nodeColor;
 		this.Id = Id;
 		this.weight = weight;
 	}
 	
-	public GraphNode(Integer Id, NodeColor nodeColor, Double weight) {
+	public GraphNode(long Id, NodeColor nodeColor, Double weight) {
 		this();
 		this.nodeColor = nodeColor;
 		this.Id = Id;
@@ -63,7 +63,7 @@ public final class GraphNode {
 		return weight;
 	}
 
-	public Integer getId() {
+	public long getId() {
 		return Id;
 	}
 	

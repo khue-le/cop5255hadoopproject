@@ -11,6 +11,8 @@ public class Weight {
 
 	private Double weight;
 
+	public static final Weight ZERO = new Weight(0d);
+	
 	public Weight(Double weight) {
 		super();
 		this.weight = weight;
