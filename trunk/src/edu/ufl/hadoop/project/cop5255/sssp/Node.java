@@ -1,95 +1,119 @@
-import java.util.*;
+package edu.ufl.hadoop.project.cop5255.sssp;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.hadoop.io.Text;
+
+import edu.ufl.hadoop.project.cop5255.util.Edge;
+import edu.ufl.hadoop.project.cop5255.util.GraphNode;
+import edu.ufl.hadoop.project.cop5255.util.NodeColor;
+import edu.ufl.hadoop.project.cop5255.util.Weight;
 
 public class Node {
 
-  public static enum Color {
-    WHITE, GRAY, BLACK
-  };
+	private final long id;
+	private Double distance;
+	private List<Edge> edges = new ArrayList<Edge>();
+	private NodeColor color = NodeColor.WHITE;
 
-  private final int id;
-  private int distance;
-  private List<Integer> edges = new ArrayList<Integer>();
-  private Color color = Color.WHITE;
+	public Node(String str) {
+		Pattern pattern = Pattern.compile("(.*?)\t(.*)");
+		Matcher matcher = pattern.matcher(str);
+		matcher.find();
+		id = Long.parseLong(matcher.group(1).trim());
+		StringBuilder builder = new StringBuilder();
+		int totalCount = matcher.group(2).trim().split(",").length;
+		for (int i = 0; i < totalCount; i++) {
+			builder.append("(.*?)");
+			if (i != totalCount - 1) {
+				builder.append(",");
+			}
+		}
+		builder.append("\\|(.*?)\\|(.*)");
+		pattern = Pattern.compile(builder.toString());
+		matcher = pattern.matcher(matcher.group(2).trim());
+		matcher.find();
+		for (int i = 0; i < totalCount; i++) {
+			Pattern weightPattern = Pattern.compile("\\(+([0-9].*)\\.+");
+			Matcher weightMatcher = weightPattern.matcher(matcher.group(i + 1));
+			weightMatcher.find();
+			Double distance = Double.valueOf(weightMatcher.group().substring(1,
+					weightMatcher.group().length() - 1));
+			System.out.println("Weight"
+					+ weightMatcher.group().substring(1,
+							weightMatcher.group().length() - 1));
+			System.out.println("To node : " + matcher.group(i + 1));
+			this.addEdge(new Edge(new Node(id, NodeColor.BLACK,
+					Double.MIN_VALUE), new Node(id, NodeColor.BLACK,
+					Double.MIN_VALUE), distance));
+		}
+		System.out.println("Weight : " + matcher.group(totalCount + 1));
+		System.out.println("Color :" + matcher.group(totalCount + 2));
 
-  public Node(String str) {
+	}
 
-    String[] map = str.split("\t");
-    String key = map[0];
-    String value = map[1];
+	public Node(long id) {
+		this.id = id;
+	}
 
-    String[] tokens = value.split("\\|");
+	public Node(long Id, NodeColor nodeColor, Double distance) {
+		this.color = nodeColor;
+		this.id = Id;
+		this.distance = distance;
+	}
 
-    this.id = Integer.parseInt(key);
+	public long getId() {
+		return this.id;
+	}
 
-    for (String s : tokens[0].split(",")) {
-      if (s.length() > 0) {
-        edges.add(Integer.parseInt(s));
-      }
-    }
-    
-    if (tokens[1].equals("Integer.MAX_VALUE")) {
-      this.distance = Integer.MAX_VALUE;
-    } else {
-      this.distance = Integer.parseInt(tokens[1]);
-    }
-    
-    this.color = Color.valueOf(tokens[2]);
+	public Double getDistance() {
+		return this.distance;
+	}
 
-  }
+	public void setDistance(Double distance) {
+		this.distance = distance;
+	}
 
-  public Node(int id) {
-    this.id = id;
-  }
+	public NodeColor getColor() {
+		return this.color;
+	}
 
-  public int getId() {
-    return this.id;
-  }
+	public void setColor(NodeColor color) {
+		this.color = color;
+	}
 
-  public int getDistance() {
-    return this.distance;
-  }
+	public List<Edge> getEdges() {
+		return this.edges;
+	}
 
-  public void setDistance(int distance) {
-    this.distance = distance;
-  }
+	public void addEdge(Edge edge) {
+		this.edges.add(edge);
+	}
 
-  public Color getColor() {
-    return this.color;
-  }
+	public void setEdges(List<Edge> edges) {
+		this.edges = edges;
+	}
 
-  public void setColor(Color color) {
-    this.color = color;
-  }
+	public Text getLine() {
+		StringBuffer s = new StringBuffer();
 
-  public List<Integer> getEdges() {
-    return this.edges;
-  }
+		for (Edge v : edges) {
+			s.append(v.toString()).append(",");
+		}
+		s.append("|");
 
-  public void setEdges(List<Integer> edges) {
-    this.edges = edges;
-  }
+		if (this.distance < Integer.MAX_VALUE) {
+			s.append(this.distance).append("|");
+		} else {
+			s.append("Integer.MAX_VALUE").append("|");
+		}
 
-  public Text getLine() {
-    StringBuffer s = new StringBuffer();
-    
-    for (int v : edges) {
-      s.append(v).append(",");
-    }
-    s.append("|");
+		s.append(color.toString());
 
-    if (this.distance < Integer.MAX_VALUE) {
-      s.append(this.distance).append("|");
-    } else {
-      s.append("Integer.MAX_VALUE").append("|");
-    }
-
-    s.append(color.toString());
-
-    return new Text(s.toString());
-  }
+		return new Text(s.toString());
+	}
 
 }

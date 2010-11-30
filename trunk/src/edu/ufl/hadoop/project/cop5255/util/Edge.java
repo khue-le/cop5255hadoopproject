@@ -3,37 +3,39 @@
  */
 package edu.ufl.hadoop.project.cop5255.util;
 
+import edu.ufl.hadoop.project.cop5255.sssp.Node;
+
 /**
  * @author Owner
  *
  */
 public class Edge {
 
-	private GraphNode toNode;
+	private Node toNode;
 	
-	private GraphNode fromNode;
+	private Node fromNode;
 	
 	private Weight weight;
 
-	public Edge(GraphNode toNode, GraphNode fromNode, Double weight) {
+	public Edge(Node toNode, Node fromNode, Double weight) {
 		super();
 		this.toNode = toNode;
 		this.fromNode = fromNode;
 		this.weight = new Weight(weight);
 	}
 	
-	public Edge(GraphNode toNode, GraphNode fromNode, Weight weight) {
+	public Edge(Node toNode, Node fromNode, Weight weight) {
 		super();
 		this.toNode = toNode;
 		this.fromNode = fromNode;
 		this.weight = weight;
 	}
 
-	public GraphNode getToNode() {
+	public Node getToNode() {
 		return toNode;
 	}
 
-	public GraphNode getFromNode() {
+	public Node getFromNode() {
 		return fromNode;
 	}
 
@@ -45,4 +47,7 @@ public class Edge {
 		return weight.getWeightInDouble();
 	}
 	
+	public String toString() {
+		return toNode.getId() + "(" + getWeightInDouble() + ")";
+	}
 }
