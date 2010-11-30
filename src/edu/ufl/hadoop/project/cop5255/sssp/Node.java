@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 import org.apache.hadoop.io.Text;
 
 import edu.ufl.hadoop.project.cop5255.util.Edge;
-import edu.ufl.hadoop.project.cop5255.util.GraphNode;
+
 import edu.ufl.hadoop.project.cop5255.util.NodeColor;
 import edu.ufl.hadoop.project.cop5255.util.Weight;
 
@@ -37,22 +37,27 @@ public class Node {
 		matcher = pattern.matcher(matcher.group(2).trim());
 		matcher.find();
 		for (int i = 0; i < totalCount; i++) {
-			Pattern weightPattern = Pattern.compile("\\(+([0-9].*)\\.+");
+			Pattern weightPattern = Pattern.compile("\\(+(.*)\\.+");
 			Matcher weightMatcher = weightPattern.matcher(matcher.group(i + 1));
 			weightMatcher.find();
-			Double distance = Double.valueOf(weightMatcher.group().substring(1,
-					weightMatcher.group().length() - 1));
 			System.out.println("Weight"
-					+ weightMatcher.group().substring(1,
-							weightMatcher.group().length() - 1));
+					+ matcher.group(i + 1));
+			Double distance = matcher.group(i + 1).trim().equals("") ? 999d : Double.valueOf(weightMatcher.group().substring(1,
+					weightMatcher.group().length() - 1));
 			System.out.println("To node : " + matcher.group(i + 1));
-			this.addEdge(new Edge(new Node(id, NodeColor.BLACK,
-					Double.MIN_VALUE), new Node(id, NodeColor.BLACK,
-					Double.MIN_VALUE), distance));
+			String toNode = matcher.group(i + 1);
+			if(!toNode.trim().equals("")) {
+			this.addEdge(new Edge( 
+					new Node(Long.valueOf(toNode.substring(0, toNode.indexOf("("))), NodeColor.BLACK, distance), 
+					new Node(id, NodeColor.BLACK, Double.MIN_VALUE), distance));
+			}
+			
 		}
 		System.out.println("Weight : " + matcher.group(totalCount + 1));
 		System.out.println("Color :" + matcher.group(totalCount + 2));
-
+		this.color = NodeColor.valueOf(matcher.group(totalCount + 2));
+		String weightInString = matcher.group(totalCount + 1);
+		this.distance = weightInString.equalsIgnoreCase("Integer.MAX_VALUE") ? Double.POSITIVE_INFINITY : Double.valueOf(weightInString); 
 	}
 
 	public Node(long id) {
@@ -105,7 +110,7 @@ public class Node {
 		}
 		s.append("|");
 
-		if (this.distance < Integer.MAX_VALUE) {
+		if (this.distance < Double.MAX_VALUE) {
 			s.append(this.distance).append("|");
 		} else {
 			s.append("Integer.MAX_VALUE").append("|");
