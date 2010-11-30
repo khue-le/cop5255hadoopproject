@@ -5,8 +5,8 @@ package edu.ufl.hadoop.project.cop5255.builder;
 
 import java.util.Random;
 
+import edu.ufl.hadoop.project.cop5255.sssp.Node;
 import edu.ufl.hadoop.project.cop5255.util.Edge;
-import edu.ufl.hadoop.project.cop5255.util.GraphNode;
 import edu.ufl.hadoop.project.cop5255.util.NodeColor;
 
 /**
@@ -26,8 +26,8 @@ public class EdgeBuilder {
 			node2 = random.nextLong() % noOfNodes;
 		} while(node1 <= 0 || node2 <= 0 || node1 == node2);
  		return new Edge(
- 				new GraphNode(node1, NodeColor.WHITE, Double.POSITIVE_INFINITY), 
- 				new GraphNode(node2, NodeColor.WHITE, Double.POSITIVE_INFINITY), 
+ 				new Node(node1, NodeColor.WHITE, Double.POSITIVE_INFINITY), 
+ 				new Node(node2, NodeColor.WHITE, Double.POSITIVE_INFINITY), 
  				Double.valueOf(random.nextInt(RANDOM_UPPER_LIMIT_WEIGHT)
  				)
  			);

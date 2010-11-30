@@ -15,6 +15,7 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 
 import edu.ufl.hadoop.project.cop5255.filter.InputPathFilter;
+import edu.ufl.hadoop.project.cop5255.sssp.Node;
 import edu.ufl.hadoop.project.cop5255.util.Edge;
 import edu.ufl.hadoop.project.cop5255.util.GraphNode;
 import edu.ufl.hadoop.project.cop5255.util.NodeColor;
@@ -37,8 +38,8 @@ public class GraphBuilder {
 			while (counter < totalNoOfEdges) {
 				Edge edge = EdgeBuilder.build(totalNoOfEdges);
 				if (counter == 0) {
-					edge = new Edge(new GraphNode(startNode, NodeColor.GRAY,
-							Weight.ZERO), value.toString().equals(
+					edge = new Edge(new Node(startNode, NodeColor.GRAY,
+							Weight.ZERO.getWeightInDouble()), value.toString().equals(
 							edge.getToNode()) ? edge.getFromNode() : edge
 							.getToNode(), edge.getWeightInDouble());
 				}
