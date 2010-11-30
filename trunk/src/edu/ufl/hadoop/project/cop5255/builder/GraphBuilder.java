@@ -17,7 +17,7 @@ import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import edu.ufl.hadoop.project.cop5255.filter.InputPathFilter;
 import edu.ufl.hadoop.project.cop5255.sssp.Node;
 import edu.ufl.hadoop.project.cop5255.util.Edge;
-import edu.ufl.hadoop.project.cop5255.util.GraphNode;
+
 import edu.ufl.hadoop.project.cop5255.util.NodeColor;
 import edu.ufl.hadoop.project.cop5255.util.Weight;
 

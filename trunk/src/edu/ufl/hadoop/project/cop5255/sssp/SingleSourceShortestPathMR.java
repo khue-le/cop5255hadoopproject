@@ -12,15 +12,16 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.MapReduceBase;
+import org.apache.hadoop.mapred.Mapper;
 import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.Reducer;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.hadoop.mapred.RunningJob;
-import org.apache.hadoop.mapreduce.Job;
-import org.apache.hadoop.mapreduce.Mapper;
-import org.apache.hadoop.mapreduce.Reducer;
-import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
-import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
@@ -50,8 +51,8 @@ public class SingleSourceShortestPathMR extends Configured implements Tool {
 	 * edge of a Color.GRAY node, we emit a new Node with distance incremented
 	 * by one. The Color.GRAY node is then colored black and is also emitted.
 	 */
-	public static class MapClass extends
-			Mapper<LongWritable, Text, LongWritable, Text> {
+	public static class MapClass extends MapReduceBase implements
+    Mapper<LongWritable, Text, LongWritable, Text> {
 
 		public void map(LongWritable key, Text value,
 				OutputCollector<LongWritable, Text> output, Reporter reporter)
@@ -89,8 +90,8 @@ public class SingleSourceShortestPathMR extends Configured implements Tool {
 	/**
 	 * A reducer class that just emits the sum of the input values.
 	 */
-	public static class Reduce extends
-			Reducer<LongWritable, Text, LongWritable, Text> {
+	public static class Reduce extends MapReduceBase implements
+    Reducer<LongWritable, Text, LongWritable, Text> {
 
 		/**
 		 * Make a new node which combines all information for this single node
@@ -109,6 +110,7 @@ public class SingleSourceShortestPathMR extends Configured implements Tool {
 			while (values.hasNext()) {
 				Text value = values.next();
 
+				System.out.println("In Reduce  - " + value.toString());
 				Node u = new Node(key.get() + "\t" + value.toString());
 
 				// One (and only one) copy of the node will be the fully
@@ -147,6 +149,33 @@ public class SingleSourceShortestPathMR extends Configured implements Tool {
 		return -1;
 	}
 
+	  private JobConf getJobConf(String[] args) {
+		    JobConf conf = new JobConf(getConf(), SingleSourceShortestPathMR.class);
+		    conf.setJobName("graphsearch");
+
+		    // the keys are the unique identifiers for a Node (ints in this case).
+		    conf.setOutputKeyClass(LongWritable.class);
+		    // the values are the string representation of a Node
+		    conf.setOutputValueClass(Text.class);
+
+		    conf.setMapperClass(MapClass.class);
+		    conf.setReducerClass(Reduce.class);
+
+		    for (int i = 0; i < args.length; ++i) {
+		      if ("-m".equals(args[i])) {
+		        conf.setNumMapTasks(Integer.parseInt(args[++i]));
+		      } else if ("-r".equals(args[i])) {
+		        conf.setNumReduceTasks(Integer.parseInt(args[++i]));
+		      }
+		    }
+
+		    LOG.info("The number of reduce tasks has been set to " + conf.getNumReduceTasks());
+		    LOG.info("The number of mapper tasks has been set to " + conf.getNumMapTasks());
+
+		    return conf;
+		  }
+
+
 	/**
 	 * The main driver for word count map/reduce program. Invoke this method to
 	 * submit the map/reduce job.
@@ -157,7 +186,6 @@ public class SingleSourceShortestPathMR extends Configured implements Tool {
 	public int run(String[] args) throws Exception {
 
 		int iterationCount = 0;
-		Configuration conf = new Configuration();
 		while (keepGoing(iterationCount)) {
 
 			String input;
@@ -169,30 +197,14 @@ public class SingleSourceShortestPathMR extends Configured implements Tool {
 			String output = "output-graph-" + (iterationCount + 1);
 
 			Path deletePath = new Path("output-graph-" + (iterationCount - 1));
-			Job job = new Job(conf, "Single Source Shortest Path");
-			// the keys are the unique identifiers for a Node (ints in this
-			// case).
-			job.setOutputKeyClass(IntWritable.class);
-			// the values are the string representation of a Node
-			job.setOutputValueClass(Text.class);
+		      JobConf conf = getJobConf(args);
+		      FileInputFormat.setInputPaths(conf, new Path(input));
+		      FileOutputFormat.setOutputPath(conf, new Path(output));
+		      RunningJob job = JobClient.runJob(conf);
 
-			job.setMapperClass(MapClass.class);
-			job.setReducerClass(Reduce.class);
-
-			for (int i = 0; i < args.length; ++i) {
-				if ("-m".equals(args[i])) {
-					// job.setNumMapTasks(Integer.parseInt(args[++i]));
-				} else if ("-r".equals(args[i])) {
-					job.setNumReduceTasks(Integer.parseInt(args[++i]));
-				}
-			}
 
 			if (deletePath.getFileSystem(conf).exists(deletePath))
 				deletePath.getFileSystem(conf).delete(deletePath, true);
-
-			FileInputFormat.setInputPaths(job, new Path(input));
-			FileOutputFormat.setOutputPath(job, new Path(output));
-			job.waitForCompletion(true);
 			iterationCount++;
 		}
 
