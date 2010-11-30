@@ -19,7 +19,7 @@ public class MainExecutingDriver {
 		    ProgramDriver programDriver = new ProgramDriver();
 		    try {
 		    	programDriver.addClass("generate-map", GraphBuilder.class, "Generates the graph having atmost pre-defined number of edges.");
-		    	programDriver.addClass("generate-map", SingleSourceShortestPathMR.class, "Single Source Shortest Path algorithm implemented on huge graph");
+		    	programDriver.addClass("sssp", SingleSourceShortestPathMR.class, "Single Source Shortest Path algorithm implemented on huge graph");
 		    	programDriver.driver(arguments);
 		    } catch(Throwable e) {
 		    	e.printStackTrace();
